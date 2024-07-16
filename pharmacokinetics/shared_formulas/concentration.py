@@ -1,5 +1,6 @@
 import math
 from pharmacokinetics import _handlers
+from pharmacokinetics import multiple_doses, single_dose
 
 __all__ = [
     "concentrationAtTime",
@@ -16,17 +17,25 @@ def concentrationAtTime(dose: float, **kwargs) -> float:
         t12: elimination half-life (alternative to `ke`)
         ka: absorption rate constant
         t12abs: absorption half-life
-        time_elapsed: time since drug administration
-        dose_interval: interval between doses (optional)"""
-    ke = _handlers._getPkConstantFromKwargs("ke", "t12", kwargs)
+        elapsed: time since drug administration
+        interval: interval between doses (optional)"""
     ka = _handlers._getPkConstantFromKwargs("ka", "t12abs", kwargs)
-    vd = kwargs.get("vd", 1)
+    ke = _handlers._getPkConstantFromKwargs("ke", "t12", kwargs)
     bioavailability = kwargs.get("bioavailability", 1)
-    time_elapsed = kwargs.get("time_elapsed")
-    dose_interval = kwargs.get("dose_interval")
-    _lFrac = (bioavailability * dose * ka) / (vd * (ka - ke))
-    if dose_interval != None:
-        _rFrac1 = math.e**(-ke * time_elapsed) / (1 - math.e**(-ke * dose_interval))
-        _rFrac2 = math.e**(-ka * time_elapsed) / (1 - math.e**(-ka * dose_interval))
-        return _lFrac * (_rFrac1 - _rFrac2)
-    return _lFrac * (math.e**(-ke*time_elapsed) - math.e**(-ka * time_elapsed))
+    elapsed = kwargs.get("elapsed")
+    vd = kwargs.get("vd", 1)
+    interval = kwargs.get("interval")
+    isMultiDose = interval != None
+
+    if isMultiDose:
+        fraction = (bioavailability * dose * ka) / (vd * (ka - ke))
+        multiplier = math.exp(-ke * elapsed) / (1 - math.exp(-ke * interval))
+        multiplier -= math.exp(-ka * elapsed) / (1 - math.exp(-ka * interval))
+        return fraction * multiplier
+    if ka == ke: # different formula required to prevent undefined value
+        k = float(ka)
+        fraction = bioavailability * dose * k / vd
+        return fraction * elapsed * math.exp(-k * elapsed)
+    fraction = (bioavailability * dose * ka) / (vd * (ka - ke))
+    multiplier = math.exp(-ke * elapsed) - math.exp(-ka * elapsed)
+    return fraction * multiplier

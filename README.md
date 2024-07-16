@@ -1,4 +1,6 @@
 # pharmacokinetics
+![downloads](https://img.shields.io/pepy/dt/pharmacokinetics) ![repo-size](https://img.shields.io/github/repo-size/xyzpw/pharmacokinetics-module)
+
 The **pharmacokinetics** package is a Python package designed to make pharmacokinetic formulas easier to calculate in your Python code.
 
 ## Usage
@@ -29,14 +31,14 @@ pk.concentrationAtTime(
     bioavailability=0.99,
     t12=4.5,
     t12abs=7/60,
-    time_elapsed=6
+    elapsed=6
 )
 ```
 This above code follows the formula:
 
 $\frac{F \cdot D \cdot k_a}{Vd(k_a - k_e)}(e^{-k_e \cdot t} - e^{-k_a \cdot t})$
 
-Alternatively, `dose_interval` can be used if the drug is taken at intervals, this will use the formula:
+Alternatively, `interval` can be used if the drug is taken at intervals, this will use the formula:
 
 $\Large{\frac{F \cdot D \cdot k_a}{Vd(k_a - k_e)}(\frac{e^{-k_e \cdot t}}{1 - e^{-k_e \cdot \tau}} - \frac{e^{-k_a \cdot t}}{1 - e^{-k_a \cdot \tau}})}$
 
@@ -45,9 +47,9 @@ Half-lives can be solved if the initial concentration, remaining concentration, 
 ```python
 import pharmacokinetics as pk
 pk.single_dose.halflifeFromDoses(
-    initial_dose=15,
-    remaining_dose=9,
-    time_elapsed=9
+    dose=15,
+    dose=9,
+    elapsed=9
 )
 ```
 Where the time elapsed is the time past since the drug has reached maximum concentration and begins the elimination phase, which will then follow the formula $C = e^{-x \cdot 9 \ h}$ where $x$ is the elimination rate constant. Solving for $x$ becomes $\frac{\ln(\frac{9}{15})}{9} = -k_e$ to get half-life we use $\frac{\ln2}{|-k_e|} = 12.2 \ h$.

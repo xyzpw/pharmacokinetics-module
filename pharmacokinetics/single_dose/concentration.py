@@ -14,13 +14,13 @@ def calculateConcentration(dose: float, vd: float, bioavailability: float = 1) -
     :param bioavailability: fraction of the drug absorbed into the systemic circulation (default 1)"""
     return (dose * bioavailability) / vd
 
-def calculateRemaining(initial_concentration: float, time_elapsed: float, **kwargs) -> float:
+def calculateRemaining(concentration: float, elapsed: float, **kwargs) -> float:
     """Calculates the concentration remaining after a specified time.
 
-    :param initial_concentration: the initial concentration
-    :param time_elapsed: time passed since peak concentrations were reached
+    :param concentration: the initial concentration
+    :param elapsed: time passed since peak concentrations were reached
     :param **kwargs:
         ke: elimination rate constant
         t12: elimination half-life (alternative to `ke`)"""
     ke = _handlers._getPkConstantFromKwargs("ke", "t12", kwargs)
-    return initial_concentration * math.e**(-ke * time_elapsed)
+    return concentration * math.e**(-ke * elapsed)
